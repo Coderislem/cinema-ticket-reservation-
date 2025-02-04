@@ -4,6 +4,16 @@ from .models import Movie
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import MovieSerializer
+from rest_framework.views import APIView
+from rest_framework.mixins import (ListModelMixin
+                                   ,CreateModelMixin
+                                   ,RetrieveModelMixin
+                                   ,UpdateModelMixin
+                                   ,DestroyModelMixin)
+from rest_framework.generics import GenericAPIView
+from rest_framework import generics
+from rest_framework import viewsets
+
 # Create your views here.
 
 
@@ -82,5 +92,89 @@ def movie_detail(request,pk):
     if request.method == 'GET':
         serializer = MovieSerializer(movie)
         return Response(serializer.data)
-    
+    elif request.method =='PUT':
+        serializer = MovieSerializer(movie,data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        return Response(serializer.errors,status=400)
+    elif request.method == 'DELETE':
+        movie.delete()
+        return Response(status=204)
 
+#CBV  class based view
+
+# list and create > GET and POST
+class MovieList(APIView):
+    def get(self,reqeust):
+        movies = Movie.objects.all()
+        serializer = MovieSerializer(movies,many = True)
+        return Response(serializer.data)
+    def post(self,request):
+        serilazer = MovieSerializer(data = request.data)
+        if serilazer.is_valid():
+            serilazer.save()
+            return Response(serilazer.data,status=201)
+        return Response(
+            serilazer.errors,
+            status=400
+        )
+
+#GET PUT DELETE
+class MovieDetail(APIView):
+    def get_object(self,pk):
+        try:
+            return Movie.objects.get(pk = pk)
+        except Movie.DoesNotExist:
+            return Response(status=404)
+    def get(self,reqeust,pk):
+        movies = self.get_object(pk)
+        serializer = MovieSerializer(movies)
+        return Response(serializer.data)
+    def put(self,request,pk):
+        movie = self.get_object(pk)
+        serializer = MovieSerializer(movie,data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        return Response(serializer.errors,status=400)
+    def delete(self,request,pk):
+        movie = self.get_object(pk)
+        movie.delete()
+        return Response(status=204)
+
+#class mixin
+#GET POST
+class MovieListMixin(ListModelMixin,CreateModelMixin,GenericAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+    def get(self,request):
+        return self.list(request)
+    def post(self,request):
+        return self.create(request)
+
+#GET PUT DELETE
+class MovieDetailMixin(RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin,GenericAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+    def get(self,request,pk):
+        return self.retrieve(request)
+    def put(self,request,pk):
+        return self.update(request)
+    def delete(self,request,pk):
+        return self.destroy(request)
+
+# GENERIC VIEW
+#GET POST
+class MovieListGeneric(generics.ListCreateAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+class MovieDetailGeneric(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+# VIEWSETS
+class MovieViewSet(viewsets.ModelViewSet):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
