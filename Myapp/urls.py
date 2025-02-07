@@ -2,7 +2,9 @@ from django.urls import path,include
 from . import views
 from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
-router.register('movies',views.MovieViewSet)
+router.register('movies_Vset',views.MovieViewSet)
+router.register('guest_vset',views.GuestViewSet)
+router.register('reservation_Vset',views.ReservationViewSet)
 
 urlpatterns = [
     path('movies/', views.noSerializer_noModel,name='movies'),
@@ -15,5 +17,8 @@ urlpatterns = [
     path('movies_mixen/<int:pk>/',views.MovieDetailMixin.as_view(),name="movies_detail_mixen"),
     path('movies_generic/',views.MovieListGeneric.as_view(),name="movies_list_generic"),
     path('movies_generic/<int:pk>/',views.MovieDetailGeneric.as_view(),name="movies_detail_generic"),
-    path('movies_viewset/',include(router.urls)),
+   
+   path('',include(router.urls)),
+   #search
+    path('search/',views.search_movies,name='search_movie')
 ]

@@ -7,7 +7,7 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = '__all__'
 
-class TicketSerializer(serializers.ModelSerializer):
+class GuestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guest
         fields = '__all__'
@@ -15,4 +15,4 @@ class TicketSerializer(serializers.ModelSerializer):
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
-        fields = ['id','movie.name','guest.name','seat','created_at','updated_at']
+        fields = '__all__'

@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Movie
+from .models import Movie,Guest,Reservation
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import MovieSerializer
+from .serializers import MovieSerializer,GuestSerializer,ReservationSerializer
 from rest_framework.views import APIView
 from rest_framework.mixins import (ListModelMixin
                                    ,CreateModelMixin
@@ -178,3 +178,35 @@ class MovieDetailGeneric(generics.RetrieveUpdateDestroyAPIView):
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
+
+class GuestViewSet(viewsets.ModelViewSet):
+    queryset = Guest.objects.all()
+    serializer_class = GuestSerializer
+
+class ReservationViewSet(viewsets.ModelViewSet):
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+
+#search FBV
+from django.db.models import Q  # Used for searching
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Movie
+from .serializers import MovieSerializer
+
+@api_view(['GET'])
+def search_movies(request):
+    """Search for movies by name or description."""
+    query = request.GET.get('search', '')  # Get search keyword from URL
+    movies = Movie.objects.all()
+
+    if query:
+        movies = movies.filter(Q(name__icontains=query) | Q(description__icontains=query))
+
+    serializer = MovieSerializer(movies, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+  
