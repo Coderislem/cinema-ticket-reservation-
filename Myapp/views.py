@@ -13,6 +13,12 @@ from rest_framework.mixins import (ListModelMixin
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
 from rest_framework import viewsets
+from django.db.models import Q  # Used for searching
+
+from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 # Create your views here.
 
@@ -169,11 +175,14 @@ class MovieDetailMixin(RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin,Gen
 class MovieListGeneric(generics.ListCreateAPIView):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
 class MovieDetailGeneric(generics.RetrieveUpdateDestroyAPIView):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
-
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 # VIEWSETS
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
@@ -188,12 +197,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
 
 #search FBV
-from django.db.models import Q  # Used for searching
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Movie
-from .serializers import MovieSerializer
+
 
 @api_view(['GET'])
 def search_movies(request):
